@@ -1,8 +1,10 @@
-use crate::util::{HastyError, unified_error};
+use std::{any::Any, rc::Rc};
+
+use crate::util::HastyError;
 
 /// Represents type of a token.
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -15,12 +17,12 @@ pub enum TokenType {
     AND, OR, INCREMENT, DECREMENT,
 
     // Literals.
-    IDENTIFIER, STRING(String), CHARACTER(char), INTEGER,
+    IDENTIFIER, STRING, CHARACTER, INTEGER,
     FLOATING,
 
     // Keywords.
     FN, IF, ELSE, TRUE, FALSE, WHILE, FOR, RETURN, SELF,
-    VAR, NIL, GUARD,
+    VAR, NIL, GUARD, PUB,
 
     EOF
 }
@@ -29,13 +31,15 @@ pub enum TokenType {
 #[derive(Debug, Clone)]
 pub struct Token {
     /// Type of a token.
-    token_type: TokenType,
+    pub token_type: TokenType,
     /// Source code associated with this token.
-    lexeme: String,
+    pub lexeme: String,
     /// Line where this token appears.
-    line: usize,
+    pub line: usize,
     /// Position at which token starts.
-    start: usize,
+    pub start: usize,
+    /// Additional data associated with this token
+    pub data: Option<Rc<dyn Any>>,
 }
 
 impl Token {
@@ -46,7 +50,14 @@ impl Token {
             lexeme,
             line,
             start,
+            data: None,
         }
+    }
+
+    /// Adds data to token.
+    pub fn with_data(mut self, data: impl Any) -> Self {
+        self.data = Some(Rc::new(data));
+        self
     }
 }
 
@@ -123,6 +134,14 @@ impl<'a> Scanner<'a> {
         // This should never panic, as inserting non-utf8 characters into source code is not common.
         let lexeme = String::from_utf8(Vec::from(lexeme)).unwrap();
         self.tokens.push(Token::new(token_type, lexeme, self.line, self.start))
+    }
+
+    /// Add new token with data.
+    fn add_token_with_data(&mut self, token_type: TokenType, data: impl Any) {
+        let lexeme = &self.source[self.start..self.current];
+        // This should never panic, as inserting non-utf8 characters into source code is not common.
+        let lexeme = String::from_utf8(Vec::from(lexeme)).unwrap();
+        self.tokens.push(Token::new(token_type, lexeme, self.line, self.start).with_data(data))
     }
 
     /// Scans source code to produce tokens.
@@ -235,7 +254,7 @@ impl<'a> Scanner<'a> {
 
         // Produce token.
         let value = String::from_utf8(self.source[self.start + 1..self.current - 1].to_owned());
-        self.add_token(TokenType::STRING(value.unwrap()));
+        self.add_token_with_data(TokenType::STRING, value.unwrap());
         Ok(())
     }
 
@@ -287,6 +306,7 @@ impl<'a> Scanner<'a> {
                 "var" => TokenType::VAR,
                 "nil" => TokenType::NIL,
                 "guard" => TokenType::GUARD,
+                "pub" => TokenType::PUB,
                 _ => TokenType::IDENTIFIER
             }
         );

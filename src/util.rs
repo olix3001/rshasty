@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use colored::Colorize;
 
 /// Trait for displaying hasty lang errors.
@@ -21,16 +23,18 @@ pub fn unified_error(
 
     // Error info.
     result.push_str(
-        &format!("[{}] {} {}.{}: {}\n",
+        &format!("[{}] {} {}{}{}{} {}\n",
             pipeline_part.yellow(),
             "Error".red(),
             line.to_string().red(),
+            ".".red(),
             start.to_string().red(),
+            ":".red(),
             error.red()
         )
     );
 
-    if lexeme == "" { return result; }
+    if line_str == "" { return result; }
 
     // Line preview.
     result.push_str(line_str.trim());
