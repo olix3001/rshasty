@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use colored::Colorize;
 
 /// Trait for displaying hasty lang errors.

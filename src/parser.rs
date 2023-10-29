@@ -1,4 +1,3 @@
-use std::thread::current;
 use crate::parser::ast::ASTNode;
 use crate::scanner::{Token, TokenType};
 use crate::util::{HastyError, unified_error};

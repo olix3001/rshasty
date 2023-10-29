@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod scanner;
 mod util;
 mod parser;
@@ -10,8 +12,6 @@ pub fn add(left: usize, right: usize) -> usize {
 mod tests {
     use crate::parser::Parser;
     use crate::scanner::Scanner;
-    use crate::util::HastyError;
-    use super::*;
 
     #[test]
     fn it_works() {
