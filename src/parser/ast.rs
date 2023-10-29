@@ -11,6 +11,12 @@ pub enum ASTNode {
         operator: Token,
         right: Box<ASTNode>,
     },
+    /// Logical expression with two operands (infix)
+    Logical {
+        left: Box<ASTNode>,
+        operator: Token,
+        right: Box<ASTNode>,
+    },
     /// Expression with only one operand (prefix)
     Unary {
         operator: Token,
@@ -37,6 +43,9 @@ impl Display for ASTNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ASTNode::Binary { left, operator, right } => {
+                write!(f, "({} {} {})", operator.lexeme, left, right)
+            }
+            ASTNode::Logical { left, operator, right } => {
                 write!(f, "({} {} {})", operator.lexeme, left, right)
             }
             ASTNode::Unary { operator, right } => {

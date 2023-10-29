@@ -116,7 +116,41 @@ impl Parser {
 
     // Parsing functions.
     fn expression(&mut self) -> Result<ASTNode, ParserError> {
-        self.equality()
+        self.logic_or()
+    }
+
+    /// logic_or -> logic_and ( "||" logic_and )*;
+    fn logic_or(&mut self) -> Result<ASTNode, ParserError> {
+        let mut expr: ASTNode = self.logic_and()?;
+
+        while self.match_any(&vec![TokenType::OR]) {
+            let operator = self.previous().clone();
+            let right = self.logic_and()?;
+            expr = ASTNode::Logical {
+                left: expr.boxed(),
+                operator: operator.clone(),
+                right: right.boxed(),
+            };
+        }
+
+        Ok(expr)
+    }
+
+    /// logic_and -> equality ( "&&" equality )*;
+    fn logic_and(&mut self) -> Result<ASTNode, ParserError> {
+        let mut expr: ASTNode = self.equality()?;
+
+        while self.match_any(&vec![TokenType::AND]) {
+            let operator = self.previous().clone();
+            let right = self.equality()?;
+            expr = ASTNode::Logical {
+                left: expr.boxed(),
+                operator: operator.clone(),
+                right: right.boxed(),
+            };
+        }
+
+        Ok(expr)
     }
 
     /// equality -> comparison ( ( "!=" | "==" ) comparison)*;

@@ -15,9 +15,9 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let tokens = Scanner::new("(2 + 2 * 2 / 5 - 2").scan();
+        let tokens = Scanner::new("2 + 2 * 2 == 6 && 3 == 3 || 7 == 8 && 2 - 2 == 0").scan();
         println!("{:#?}", tokens);
         let ast = Parser::new(tokens.unwrap()).parse();
-        panic!("{}", ast.unwrap_err().as_hasty_error_string());
+        panic!("{}", ast.unwrap());
     }
 }
