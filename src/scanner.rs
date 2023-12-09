@@ -22,7 +22,7 @@ pub enum TokenType {
 
     // Keywords.
     FN, IF, ELSE, TRUE, FALSE, WHILE, FOR, RETURN, SELF,
-    VAR, NIL, GUARD, PUB,
+    VAR, NIL, GUARD, PUB, IMPORT, FROM, AS,
 
     EOF
 }
@@ -307,6 +307,9 @@ impl<'a> Scanner<'a> {
                 "nil" => TokenType::NIL,
                 "guard" => TokenType::GUARD,
                 "pub" => TokenType::PUB,
+                "import" => TokenType::IMPORT,
+                "from" => TokenType::FROM,
+                "as" => TokenType::AS,
                 _ => TokenType::IDENTIFIER
             }
         );

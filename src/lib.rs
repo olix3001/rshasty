@@ -16,8 +16,9 @@ mod tests {
     #[test]
     fn it_works() {
         let tokens = Scanner::new("2 + 2 * 2 == 6 && 3 == 3 || 7 == 8 && 2 - 2 == 0").scan();
-        println!("{:#?}", tokens);
+        // println!("{:#?}", tokens);
         let ast = Parser::new(tokens.unwrap()).parse();
-        panic!("{}", ast.unwrap());
+        println!("{}", ast.unwrap());
+        panic!("bruh");
     }
 }
