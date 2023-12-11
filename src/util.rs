@@ -1,6 +1,7 @@
 use colored::Colorize;
 
 pub mod metacontainer;
+pub mod scope;
 
 /// Trait for displaying hasty lang errors.
 pub trait HastyError {

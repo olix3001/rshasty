@@ -3,6 +3,7 @@
 mod scanner;
 mod util;
 mod parser;
+mod passes;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right
