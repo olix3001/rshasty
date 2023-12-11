@@ -15,7 +15,7 @@ pub enum ScopePassError {
 #[derive(Clone, Debug, PartialEq)]
 /// Used internally by ScopePass
 struct VarInfo {
-    ty: String
+    ty: String // Should this be a special type? We might want to add more info to type data, like generics, its exact location, etc.
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -64,7 +64,7 @@ impl ScopePass {
                 self.process_node(expr, scope)?;
                 node.meta.insert(TypeInfo { ty: expr.meta.get::<TypeInfo>().unwrap().ty.clone() });
             },
-            // TODO: Type inference for binary expressions (operator overloading should be implemented first)
+            // TODO: Add info about operator overloads and such
             _ => {}
         }
         Ok(())
