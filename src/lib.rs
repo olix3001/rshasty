@@ -12,13 +12,14 @@ pub fn add(left: usize, right: usize) -> usize {
 mod tests {
     use crate::parser::Parser;
     use crate::scanner::Scanner;
+    use crate::parser::ast::ASTNodeVecExt;
 
     #[test]
     fn it_works() {
         let tokens = Scanner::new("2 + 2 * 2 == 6 && 3 == 3 || 7 == 8 && 2 - 2 == 0").scan();
         // println!("{:#?}", tokens);
         let ast = Parser::new(tokens.unwrap()).parse();
-        println!("{}", ast.unwrap());
+        println!("{}", ast.unwrap().display(0));
         panic!("bruh");
     }
 }

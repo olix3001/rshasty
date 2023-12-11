@@ -60,3 +60,21 @@ impl Display for ASTNode {
         }
     }
 }
+
+pub trait ASTNodeVecExt {
+    fn display(&self, indent: usize) -> String;
+}
+
+impl ASTNodeVecExt for Vec<ASTNode> {
+    fn display(&self, indent: usize) -> String {
+        let mut result = String::new();
+
+        result.push_str(&format!("{}{{\n", "    ".repeat(indent)));
+        for node in self {
+            result.push_str(&format!("{}{}\n", "    ".repeat(indent+1), node));
+        }
+        result.push_str(&format!("{}}}\n", "    ".repeat(indent)));
+
+        result
+    }
+}
