@@ -217,7 +217,7 @@ impl<'a> Scanner<'a> {
                     self.identifier()?;
                 }
             },
-            'A'..='z' => { self.identifier()?; },
+            '$' | 'A'..='z' => { self.identifier()?; },
 
             // Useless characters.
             ' ' | '\r' | '\t' => { /* ignore */ },

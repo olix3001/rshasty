@@ -1,8 +1,16 @@
-use std::{any::{TypeId, Any}, collections::HashMap};
+use std::{any::{TypeId, Any}, collections::HashMap, fmt::Debug};
 
 /// Container for all metadata (used for additional information in AST)
 pub struct MetaContainer {
     pub meta: HashMap<TypeId, Box<dyn Any>>
+}
+
+impl Debug for MetaContainer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MetaContainer")
+            .field("meta", &self.meta)
+            .finish()
+    }
 }
 
 impl MetaContainer {

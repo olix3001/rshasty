@@ -2,6 +2,8 @@ use crate::parser::ast::ASTNode;
 use crate::scanner::{Token, TokenType};
 use crate::util::{HastyError, unified_error};
 
+use self::ast::BoxedASTNode;
+
 pub mod ast;
 
 /// Struct for parsing tokens into AST.
@@ -113,10 +115,10 @@ impl Parser {
     }
 
     // Basics.
-    pub fn parse(mut self) -> Result<Vec<ASTNode>, ParserError> {
+    pub fn parse(mut self) -> Result<Vec<BoxedASTNode>, ParserError> {
         let mut statements = Vec::new();
         while !self.is_at_end() {
-            statements.push(self.declaration()?);
+            statements.push(self.declaration()?.boxed());
         }
 
         Ok(statements)

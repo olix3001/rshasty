@@ -1,26 +1,63 @@
-use std::fmt::Display;
+use std::{fmt::Display, ops::{Deref, DerefMut}};
 
-use crate::scanner::Token;
+use crate::{scanner::Token, util::metacontainer::MetaContainer};
+
+/// Boxed AST Node with metadata
+#[derive(Debug)]
+pub struct BoxedASTNode {
+    pub node: Box<ASTNode>,
+    pub meta: MetaContainer,
+}
+
+impl From<ASTNode> for BoxedASTNode {
+    fn from(node: ASTNode) -> Self {
+        Self {
+            node: Box::new(node),
+            meta: MetaContainer::new(),
+        }
+    }
+}
+
+impl Deref for BoxedASTNode {
+    type Target = ASTNode;
+
+    fn deref(&self) -> &Self::Target {
+        &self.node
+    }
+}
+
+impl DerefMut for BoxedASTNode {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.node
+    }
+}
+
+impl Display for BoxedASTNode {
+    /// Show the AST in polish notation
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.node.fmt(f)
+    }
+}
 
 /// Every possible AST Node is here.
 #[derive(Debug)]
 pub enum ASTNode {
     /// Expression with two operands (infix)
     Binary {
-        left: Box<ASTNode>,
+        left: BoxedASTNode,
         operator: Token,
-        right: Box<ASTNode>,
+        right: BoxedASTNode,
     },
     /// Logical expression with two operands (infix)
     Logical {
-        left: Box<ASTNode>,
+        left: BoxedASTNode,
         operator: Token,
-        right: Box<ASTNode>,
+        right: BoxedASTNode,
     },
     /// Expression with only one operand (prefix)
     Unary {
         operator: Token,
-        right: Box<ASTNode>,
+        right: BoxedASTNode,
     },
     /// Literal expression
     Literal {
@@ -28,13 +65,13 @@ pub enum ASTNode {
     },
     /// Grouping expression
     Grouping {
-        expr: Box<ASTNode>,
+        expr: BoxedASTNode,
     },
     /// Variable declaration/definition
     VarDecl {
         name: Token,
         ty: Option<Token>,
-        initializer: Option<Box<ASTNode>>,
+        initializer: Option<BoxedASTNode>,
     },
     /// Variable
     Variable {
@@ -43,8 +80,8 @@ pub enum ASTNode {
 }
 
 impl ASTNode {
-    pub fn boxed(self) -> Box<Self> {
-        Box::new(self)
+    pub fn boxed(self) -> BoxedASTNode {
+        BoxedASTNode::from(self)
     }
 }
 
@@ -87,6 +124,20 @@ pub trait ASTNodeVecExt {
 }
 
 impl ASTNodeVecExt for Vec<ASTNode> {
+    fn display(&self, indent: usize) -> String {
+        let mut result = String::new();
+
+        result.push_str(&format!("{}{{\n", "    ".repeat(indent)));
+        for node in self {
+            result.push_str(&format!("{}{}\n", "    ".repeat(indent+1), node));
+        }
+        result.push_str(&format!("{}}}\n", "    ".repeat(indent)));
+
+        result
+    }
+}
+
+impl ASTNodeVecExt for Vec<BoxedASTNode> {
     fn display(&self, indent: usize) -> String {
         let mut result = String::new();
 
