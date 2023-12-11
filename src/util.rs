@@ -1,5 +1,7 @@
 use colored::Colorize;
 
+pub mod metacontainer;
+
 /// Trait for displaying hasty lang errors.
 pub trait HastyError {
     fn as_hasty_error_string(&self) -> String;
