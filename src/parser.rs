@@ -104,6 +104,10 @@ impl Parser {
         if self.try_match(ty) { Ok(()) } else { Err(error) }
     }
 
+    fn consume(&mut self, ty: TokenType) -> Result<Token, ParserError> {
+        if self.check(ty.clone()) { Ok(self.advance().clone()) } else { Err(self.parser_error(ParserErrorTy::ExpectedToken { token: ty }).unwrap_err()) }
+    }
+
     fn parser_error(&self, et: ParserErrorTy) -> Result<(), ParserError> {
         Err(ParserError::new(et, self.peek().clone()))
     }
@@ -112,10 +116,19 @@ impl Parser {
     pub fn parse(mut self) -> Result<Vec<ASTNode>, ParserError> {
         let mut statements = Vec::new();
         while !self.is_at_end() {
-            statements.push(self.statement()?);
+            statements.push(self.declaration()?);
         }
 
         Ok(statements)
+    }
+
+    // Declarations.
+    fn declaration(&mut self) -> Result<ASTNode, ParserError> {
+        if self.try_match(TokenType::LET) {
+            return self.var_declaration();
+        }
+
+        self.statement()
     }
 
     // Statements.
@@ -271,6 +284,36 @@ impl Parser {
             });
         }
 
+        if self.try_match(TokenType::IDENTIFIER) {
+            return Ok(ASTNode::Variable {
+                name: self.previous().clone(),
+            });
+        }
+
         todo!()
+    }
+
+    /// var_declaration -> "let" IDENTIFIER: [type] ( "=" expression )? ";";
+    fn var_declaration(&mut self) -> Result<ASTNode, ParserError> {
+        let name = self.consume(TokenType::IDENTIFIER)?;
+        let ty = if self.try_match(TokenType::COLON) {
+            Some(self.consume(TokenType::IDENTIFIER)?)
+        } else {
+            None
+        };
+
+        let initializer = if self.try_match(TokenType::EQUAL) {
+            Some(self.expression()?)
+        } else {
+            None
+        };
+
+        self.consume(TokenType::SEMICOLON)?;
+
+        Ok(ASTNode::VarDecl {
+            name,
+            ty,
+            initializer: initializer.map(|x| x.boxed()),
+        })
     }
 }

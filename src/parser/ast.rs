@@ -29,7 +29,17 @@ pub enum ASTNode {
     /// Grouping expression
     Grouping {
         expr: Box<ASTNode>,
-    }
+    },
+    /// Variable declaration/definition
+    VarDecl {
+        name: Token,
+        ty: Option<Token>,
+        initializer: Option<Box<ASTNode>>,
+    },
+    /// Variable
+    Variable {
+        name: Token,
+    },
 }
 
 impl ASTNode {
@@ -56,6 +66,17 @@ impl Display for ASTNode {
             }
             ASTNode::Grouping { expr } => {
                 write!(f, "({})", expr)
+            }
+
+            ASTNode::VarDecl { name, ty, initializer } => {
+                write!(f, "(letvardecl {}{}{})",
+                    name.lexeme,
+                    if let Some(ty) = ty { format!(": {}", ty.lexeme) } else { String::new() },
+                    if let Some(initializer) = initializer { format!(" = {}", initializer) } else { String::new() },
+                )
+            },
+            ASTNode::Variable { name } => {
+                write!(f, "(var {})", name.lexeme)
             }
         }
     }

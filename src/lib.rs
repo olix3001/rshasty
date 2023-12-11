@@ -14,12 +14,34 @@ mod tests {
     use crate::scanner::Scanner;
     use crate::parser::ast::ASTNodeVecExt;
 
-    #[test]
-    fn it_works() {
-        let tokens = Scanner::new("2 + 2 * 2 == 6 && 3 == 3 || 7 == 8 && 2 - 2 == 0").scan();
-        // println!("{:#?}", tokens);
+    #[track_caller]
+    fn parse(input: &str) -> String {
+        let tokens = Scanner::new(input).scan();
         let ast = Parser::new(tokens.unwrap()).parse();
-        println!("{}", ast.unwrap().display(0));
-        panic!("bruh");
+        ast.unwrap().display(0)
+    }
+
+    #[test]
+    fn test_pemdas() {
+        assert_eq!(
+            parse("1 + 2 * 3 / 4 / 5 - 6 == 7 && 1 == 2 || 3 != 4"),
+            "{\n    (|| (&& (== (- (+ 1 (/ (/ (* 2 3) 4) 5)) 6) 7) (== 1 2)) (!= 3 4))\n}\n"
+        );
+    }
+
+    #[test]
+    fn test_let_var_decl() {
+        assert_eq!(
+            parse("let x: int = 1;"),
+            "{\n    (letvardecl x: int = 1)\n}\n"
+        );
+    }
+
+    #[test]
+    fn test_var_get() {
+        assert_eq!(
+            parse("1 + x"),
+            "{\n    (+ 1 (var x))\n}\n"
+        );
     }
 }

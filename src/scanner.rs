@@ -22,7 +22,7 @@ pub enum TokenType {
 
     // Keywords.
     FN, IF, ELSE, TRUE, FALSE, WHILE, FOR, RETURN, SELF,
-    VAR, NIL, GUARD, PUB, IMPORT, FROM, AS,
+    VAR, NIL, GUARD, PUB, IMPORT, FROM, AS, CONST, LET,
 
     EOF
 }
@@ -310,6 +310,8 @@ impl<'a> Scanner<'a> {
                 "import" => TokenType::IMPORT,
                 "from" => TokenType::FROM,
                 "as" => TokenType::AS,
+                "let" => TokenType::LET,
+                "const" => TokenType::CONST,
                 _ => TokenType::IDENTIFIER
             }
         );
