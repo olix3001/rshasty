@@ -30,7 +30,9 @@ impl ScopePass {
     }
 
     fn process_node(&mut self, node: &mut BoxedASTNode, scope: &mut Scope<VarInfo>) -> Result<(), ScopePassError> {
-        match *node.node {
+        // Find easy type information first
+        let mut n = node.node.borrow_mut();
+        match **n {
             ASTNode::VarDecl { ref name, ref ty, ref mut initializer } => {
                 if let Some(ty) = ty {
                     scope.add(&name.lexeme, VarInfo { ty: ty.lexeme.clone() });
@@ -64,7 +66,7 @@ impl ScopePass {
                 self.process_node(expr, scope)?;
                 node.meta.insert(TypeInfo { ty: expr.meta.get::<TypeInfo>().unwrap().ty.clone() });
             },
-            // TODO: Add info about operator overloads and such
+            // TODO: Remake this to use multiple passes: scope pass, basic type pass, inference pass. Current solution is a mess.
             _ => {}
         }
         Ok(())
@@ -73,7 +75,8 @@ impl ScopePass {
 
 impl Pass for ScopePass {
     type Error = ScopePassError;
-    fn process(&mut self, ast: &mut Vec<BoxedASTNode>) -> Result<(), Self::Error> {
+    type AdditionalData = ();
+    fn process(&mut self, ast: &mut Vec<BoxedASTNode>) -> Result<Self::AdditionalData, Self::Error> {
         let mut scope = Scope::<VarInfo>::new();
         for node in ast {
             self.process_node(node, &mut scope)?;
@@ -96,8 +99,8 @@ mod tests {
         let mut ast = ast.unwrap();
         super::ScopePass::new().process(&mut ast).unwrap();
         assert_eq!(
-            ast[0].meta.get::<super::TypeInfo>().unwrap(),
-            &super::TypeInfo { ty: "int".to_string() }
+            *ast[0].meta.get::<super::TypeInfo>().unwrap(),
+            super::TypeInfo { ty: "int".to_string() }
         );
     }
 
@@ -108,8 +111,8 @@ mod tests {
         let mut ast = ast.unwrap();
         super::ScopePass::new().process(&mut ast).unwrap();
         assert_eq!(
-            ast[1].meta.get::<super::TypeInfo>().unwrap(),
-            &super::TypeInfo { ty: "int".to_string() }
+            *ast[1].meta.get::<super::TypeInfo>().unwrap(),
+            super::TypeInfo { ty: "int".to_string() }
         );
     }
 
@@ -128,8 +131,8 @@ mod tests {
         let mut ast = ast.unwrap();
         super::ScopePass::new().process(&mut ast).unwrap();
         assert_eq!(
-            ast[1].meta.get::<super::TypeInfo>().unwrap(),
-            &super::TypeInfo { ty: "int".to_string() }
+            *ast[1].meta.get::<super::TypeInfo>().unwrap(),
+            super::TypeInfo { ty: "int".to_string() }
         );
     }
 
@@ -140,8 +143,8 @@ mod tests {
         let mut ast = ast.unwrap();
         super::ScopePass::new().process(&mut ast).unwrap();
         assert_eq!(
-            ast[0].meta.get::<super::TypeInfo>().unwrap(),
-            &super::TypeInfo { ty: "int".to_string() }
+            *ast[0].meta.get::<super::TypeInfo>().unwrap(),
+            super::TypeInfo { ty: "int".to_string() }
         );
     }
 }

@@ -1,8 +1,9 @@
-use std::{any::{TypeId, Any}, collections::HashMap, fmt::Debug};
+use std::{any::{TypeId, Any}, collections::HashMap, fmt::Debug, cell::RefCell, rc::Rc};
 
 /// Container for all metadata (used for additional information in AST)
+#[derive(Clone)]
 pub struct MetaContainer {
-    pub meta: HashMap<TypeId, Box<dyn Any>>
+    pub meta: Rc<RefCell<HashMap<TypeId, Box<dyn Any>>>>
 }
 
 impl Debug for MetaContainer {
@@ -16,20 +17,17 @@ impl Debug for MetaContainer {
 impl MetaContainer {
     pub fn new() -> Self {
         Self {
-            meta: HashMap::new()
+            meta: Rc::new(RefCell::new(HashMap::new()))
         }
     }
 
-    pub fn get<T: 'static>(&self) -> Option<&T> {
-        self.meta.get(&TypeId::of::<T>()).and_then(|x| x.downcast_ref::<T>())
-    }
-
-    pub fn get_mut<T: 'static>(&mut self) -> Option<&mut T> {
-        self.meta.get_mut(&TypeId::of::<T>()).and_then(|x| x.downcast_mut::<T>())
+    pub fn get<'a, T: 'static>(&'a self) -> Option<Rc<T>> {
+        self.meta.borrow().get(&TypeId::of::<T>())
+            .and_then(|x| x.downcast_ref::<Rc<T>>().and_then(|x| Some(Rc::clone(x))))
     }
 
     pub fn insert<T: 'static>(&mut self, value: T) {
-        self.meta.insert(TypeId::of::<T>(), Box::new(value));
+        self.meta.borrow_mut().insert(TypeId::of::<T>(), Box::new(Rc::new(value)));
     }
 }
 
@@ -41,7 +39,6 @@ mod tests {
     fn test_metacontainer() {
         let mut meta = MetaContainer::new();
         meta.insert(1);
-        assert_eq!(meta.get::<i32>().unwrap(), &1);
-        assert_eq!(meta.get_mut::<i32>().unwrap(), &mut 1);
+        assert_eq!(*meta.get::<i32>().unwrap(), 1);
     }
 }

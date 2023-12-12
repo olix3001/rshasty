@@ -1,41 +1,37 @@
-use std::{fmt::Display, ops::{Deref, DerefMut}};
+use std::{fmt::Display, cell::RefCell, rc::Rc};
 
 use crate::{scanner::Token, util::metacontainer::MetaContainer};
 
 /// Boxed AST Node with metadata
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BoxedASTNode {
-    pub node: Box<ASTNode>,
+    pub node: Rc<RefCell<Box<ASTNode>>>,
     pub meta: MetaContainer,
+}
+
+impl BoxedASTNode {
+    pub fn borrow(&self) -> std::cell::Ref<Box<ASTNode>> {
+        self.node.borrow()
+    }
+
+    pub fn borrow_mut(&self) -> std::cell::RefMut<Box<ASTNode>> {
+        self.node.borrow_mut()
+    }
 }
 
 impl From<ASTNode> for BoxedASTNode {
     fn from(node: ASTNode) -> Self {
         Self {
-            node: Box::new(node),
+            node: Rc::new(RefCell::new(Box::new(node))),
             meta: MetaContainer::new(),
         }
-    }
-}
-
-impl Deref for BoxedASTNode {
-    type Target = ASTNode;
-
-    fn deref(&self) -> &Self::Target {
-        &self.node
-    }
-}
-
-impl DerefMut for BoxedASTNode {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.node
     }
 }
 
 impl Display for BoxedASTNode {
     /// Show the AST in polish notation
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.node.fmt(f)
+        self.node.borrow().fmt(f)
     }
 }
 
