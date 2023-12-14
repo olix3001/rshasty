@@ -1,7 +1,5 @@
 use crate::parser::ast::BoxedASTNode;
 
-mod scope_pass;
-
 /// Layer for processing ASTNodeMeta
 pub trait Pass {
     type Error;
