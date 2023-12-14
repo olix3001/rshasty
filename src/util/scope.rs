@@ -1,13 +1,14 @@
 use std::{collections::HashMap, cell::RefCell, rc::Rc};
 
 #[derive(Clone, Debug, PartialEq)]
-// Simple scope implementation. Used for storing variables.
-// Can be cheaply cloned as it uses Rc<RefCell<HashMap>>.
-pub struct GenericScope<T> {
+/// Simple scope implementation. Used for storing variables.
+/// Can be cheaply cloned as it uses Rc<RefCell<HashMap>>.
+struct GenericScope<T> {
     pub variables: Rc<RefCell<HashMap<String, T>>>,
     pub parent: Option<Rc<GenericScope<T>>>
 }
 
+/// Simple scope implementation. Used for storing variables and metadata.
 pub struct Scope<T>(Rc<GenericScope<T>>);
 
 impl<T: Clone> Scope<T> {
